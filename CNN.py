@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd 
 import os
-import tensorflow
+import tensorflow as tf
 import keras.api._v2.keras as keras
 from keras import layers
 from keras.preprocessing.image import ImageDataGenerator
@@ -13,6 +13,23 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import random
 from PIL import Image
+
+#   You can confirm that this is happening by using nvidia-smi to monitor the GPUs while your application is running.
+#   nvidia-smi dmon 
+#   Determine the current, default and maximum power limit as follows:
+#   nvidia-smi -q | grep 'Power Limit'
+#   Ensure that persistence mode is being used.
+#   Increase the SW Power Cap limit for all GPUs as follows, where xxx is the desired value in watts:
+#   nvidia-smi -pl xxx
+
+print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
+
+tf.test.is_built_with_cuda()
+
+print(tf.version.VERSION)
+
+import sys
+sys.version
 
 path = "E:/Aplikacje/Python 3.9/Projects/Research Project/train"
 category = []
