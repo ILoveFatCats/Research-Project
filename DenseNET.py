@@ -17,7 +17,7 @@ a = tf.constant([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
 b = tf.constant([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
 c = tf.matmul(a, b)
 
-print(c)
+#print(c)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 #os.listdir('/kaggle/input/100-bird-species')
@@ -33,7 +33,7 @@ valid_dir = dir + 'test'
 # total number of species
 species_count = len(data_['class index'].unique())
 
-print(f"There are total {species_count} species/classes.")
+#print(f"There are total {species_count} species/classes.")
 
 train_ds = keras.utils.image_dataset_from_directory(directory=train_dir,
     labels='inferred',
@@ -52,10 +52,10 @@ valid_ds = keras.utils.image_dataset_from_directory(
 )
 
 class_names = train_ds.class_names
-print(class_names[:10])
+#print(class_names[:10])
 
-print(train_ds.take(1))
-print(valid_ds.take(1))
+#print(train_ds.take(1))
+#print(valid_ds.take(1))
 
 plt.figure(figsize=(10,10))
 for images, labels in train_ds.take(1):
@@ -66,10 +66,10 @@ for images, labels in train_ds.take(1):
 #         plt.title(class_names[labels[i]])
         plt.axis('off')
         
-for image_batch, labels_batch in train_ds.take(1):
-  print(image_batch.shape)
-  print(labels_batch.shape)
-  break
+#for image_batch, labels_batch in train_ds.take(1):
+#  print(image_batch.shape)
+#  print(labels_batch.shape)
+#  break
 
 normalization_layer = layers.Rescaling(1./255)
 train_ds = train_ds.map(lambda x, y: (normalization_layer(x), y))
@@ -98,7 +98,7 @@ appended_layer = tf.keras.layers.Dense(num_classes, activation='softmax')(append
 
 densenet_final_model = tf.keras.Model(densenet_raw_model.input, appended_layer)
 
-print(densenet_final_model.summary())
+#print(densenet_final_model.summary())
 densenet_final_model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
 history = densenet_final_model.fit(
