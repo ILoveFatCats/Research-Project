@@ -10,6 +10,14 @@ import matplotlib.image as mpimg
 import PIL
 print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 
+#   You can confirm that this is happening by using nvidia-smi to monitor the GPUs while your application is running.
+#   nvidia-smi dmon 
+#   Determine the current, default and maximum power limit as follows:
+#   nvidia-smi -q | grep 'Power Limit'
+#   Ensure that persistence mode is being used.
+#   Increase the SW Power Cap limit for all GPUs as follows, where xxx is the desired value in watts:
+#   nvidia-smi -pl xxx
+
 # tf.debugging.set_log_device_placement(True)
 
 # Create some tensors
@@ -19,8 +27,6 @@ c = tf.matmul(a, b)
 
 #print(c)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-
-#os.listdir('/kaggle/input/100-bird-species')
 os.listdir('E:/Aplikacje/Python 3.9/Research Project')
 
 data_ = pd.read_csv('E:/Aplikacje/Python 3.9/Research Project/birds.csv')
@@ -33,12 +39,9 @@ valid_dir = dir + 'test'
 # total number of species
 species_count = len(data_['class index'].unique())
 
-#print(f"There are total {species_count} species/classes.")
-
 train_ds = keras.utils.image_dataset_from_directory(directory=train_dir,
     labels='inferred',
     label_mode='categorical',
-#     class_names=os.listdir(train_dir),
     batch_size=2,
     image_size=(224,224),
 )
@@ -52,10 +55,6 @@ valid_ds = keras.utils.image_dataset_from_directory(
 )
 
 class_names = train_ds.class_names
-#print(class_names[:10])
-
-#print(train_ds.take(1))
-#print(valid_ds.take(1))
 
 plt.figure(figsize=(10,10))
 for images, labels in train_ds.take(1):
@@ -65,11 +64,6 @@ for images, labels in train_ds.take(1):
         plt.imshow( images[i].numpy().astype('uint8') )
 #         plt.title(class_names[labels[i]])
         plt.axis('off')
-        
-#for image_batch, labels_batch in train_ds.take(1):
-#  print(image_batch.shape)
-#  print(labels_batch.shape)
-#  break
 
 normalization_layer = layers.Rescaling(1./255)
 train_ds = train_ds.map(lambda x, y: (normalization_layer(x), y))
@@ -86,8 +80,7 @@ densenet_raw_model = tf.keras.applications.densenet.DenseNet121(
 for layers in densenet_raw_model.layers:
     layers.trainable=False
     
-# apped Dense layers to classify it for the number of classes
-# for the given problem
+# apped Dense layers to classify it for the number of classes for the given problem
 num_classes = len(class_names)
 densenet_model_output = densenet_raw_model.layers[-1].output
 appended_layer = tf.keras.layers.Flatten()(densenet_model_output)
