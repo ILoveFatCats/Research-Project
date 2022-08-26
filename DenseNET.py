@@ -10,6 +10,9 @@ import matplotlib.image as mpimg
 import PIL
 print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 
+# First connect to firewall (access node) then to the workstation!
+# TO CONNECT TO ACCESS NODE:                "ssh 175405@kask.eti.pg.gda.pl"     password: same as steam password
+# TO CONNECT TO SANNA.KASK:                 "ssh 175405@sanna.kask"             password: same as steam password
 # TO UPDATE THE CODE:                       "scp DenseNET.py s175405@kask.eti.pg.gda.pl:ResearchProject12KASK/"
 # TO DOWNLOAD THE LOGS FORM SERVER:         "scp -p s175405@kask.eti.pg.gda.pl:ResearchProject12KASK/PowerUsageTestLog.txt ~/Apps/
 # TO RUN THE APPLICATION:                   "python3 /home/macierz/s175405/ResearchProject12KASK/DenseNET.py"
