@@ -133,14 +133,6 @@ with strategy.scope():
     gpu_model = get_model()
     gpu_model.fit(train_ds, epochs = 3)
 
-
 # === FOR SINGLE GPU TRAINING
 #gpu_model = get_model()
 #gpu_model.fit(train_ds, epochs = 3)
-
-# 1. Load balancing (?) because not all GPUs arent working at all the time
-#    (power comsumption isnt constant as stated in nvidia-smi power level cap)
-
-# 2. Try to run on 2 nodes
-
-# 3. How to setup the external sensor
