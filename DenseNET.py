@@ -1,3 +1,4 @@
+import subprocess
 import numpy as np
 import pandas as pd
 import os
@@ -38,6 +39,11 @@ print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 
 #import wandb
 #wandb.init()
+
+def running_commands():
+    nvsmii = subprocess.run('/home/gk99/tmp/ResearchProject/nvsmiPowerLog.sh', shell=True, capture_output=True)
+#    yokotool = subprocess.run('/home/gk99/tmp/ResearchProject/yokotoolPowerLogs.sh', shell=True, capture_output=True)
+running_commands()
 
 # Setting up the distributed training
 
@@ -136,3 +142,5 @@ with strategy.scope():
 # === FOR SINGLE GPU TRAINING
 #gpu_model = get_model()
 #gpu_model.fit(train_ds, epochs = 3)
+
+exit()
