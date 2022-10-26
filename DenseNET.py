@@ -144,7 +144,7 @@ def get_model():
 # === FOR MULTI GPU TRAINING
 with strategy.scope():
     gpu_model = get_model()
-    gpu_model.fit(train_ds, epochs = 3)
+gpu_model.fit(train_ds, epochs = 3)
 
 # === FOR SINGLE GPU TRAINING
 #gpu_model = get_model()
