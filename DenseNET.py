@@ -10,7 +10,6 @@ from keras.optimizers import Adam
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import PIL
-print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 
 # First connect to firewall (access node) then to the workstation!
 # TO CONNECT TO ACCESS NODE (local terminal):   "gk99@GK99:~$ ssh s175405@kask.eti.pg.gda.pl"       password: same as steam password
@@ -23,6 +22,7 @@ print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 #                                               !REMEMBER TO SPECIFY THE GPU/s ID/IDs, OTHERWISE YOU'LL GET THE LOGS OF IDLE GPUs!
 # !!! DO-TO: explain what the individual parameters are responsible for !!!
 # TO DOWNLOAD THE LOGS FORM SERVER:             "gk99@GK99:~$ scp -p s175405@kask.eti.pg.gda.pl:ResearchProject12KASK/power1.txt ~/Apps/"
+#                                               "gk99@GK99:~$ scp -p s175405@kask.eti.pg.gda.pl:ResearchProject12KASK/yoko.csv ~/Apps/"
 
 #   nvidia-smi cheat sheet:                     https://www.seimaxim.com/kb/gpu/nvidia-smi-cheat-sheet
 #   You can confirm that this is happening by using nvidia-smi to monitor the GPUs while your application is running.
@@ -32,27 +32,35 @@ print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 #   Ensure that persistence mode is being used.
 #   Increase the SW Power Cap limit for all GPUs as follows, where xxx is the desired value in watts:
 #   nvidia-smi -pl xxx
+#   (example):    sudo nvidia-smi --id=0 -pl 200
 #   NVIDIA Quadro RTX 5000 power level range: 125W - 230W
 #   NVIDIA Quadro RTX 6000 power level range: 100W - 260W
 
-# tf.debugging.set_log_device_placement(True)
+
+#   temp:
+#   yokotool /dev/usbtmc0 read T,P -o yoko.csv
+#   yokotool /dev/usbtmc0 --pmtype wt310 --baudrate=9600 info
+#
+#
 
 #import wandb
 #wandb.init()
+#wtviewer
 
 def running_commands():
-    nvsmii = subprocess.run('/home/gk99/tmp/ResearchProject/nvsmiPowerLog.sh', shell=True, capture_output=True)
-#    yokotool = subprocess.run('/home/gk99/tmp/ResearchProject/yokotoolPowerLogs.sh', shell=True, capture_output=True)
+    nvsmi = subprocess.run('/home/macierz/s175405/ResearchProject12KASK/nvsmiPowerLog.sh', shell=True, capture_output=False)
+    yokotool = subprocess.run('/home/macierz/s175405/ResearchProject12KASK/yokotoolPowerLog.sh', shell=True, capture_output=False)
 running_commands()
+
+print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 
 # Setting up the distributed training
 
 # Here You can choose the used GPUs:
-GPUs = ["GPU:0", "GPU:1", "GPU:2", "GPU:3"]
+GPUs = ["GPU:0", "GPU:1", "GPU:2", "GPU:3", "GPU:4", "GPU:5", "GPU:6", "GPU:7"]
 strategy = tf.distribute.MirroredStrategy(GPUs)                     # Distribution of training
-BATCH_SIZE = 1024                                                   # Default value is: 128 (it yields the best performance)
+BATCH_SIZE = 512                                                    # Default value is: 128 (it yields the best performance)
 GLOBAL_BATCH_SIZE = BATCH_SIZE * strategy.num_replicas_in_sync      # Auto-scalability of our training
-#opt = Adam()
 
 # Create some tensors
 a = tf.constant([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
@@ -127,8 +135,7 @@ def get_model():
     ])
 
     model.compile(
-        tf.keras.optimizers.RMSprop(learning_rate=0.005),
-        #optimizer='Adam',
+        optimizer=tf.keras.optimizers.Adam(learning_rate=0.005),
         loss='categorical_crossentropy',
         metrics=['accuracy']
     )
