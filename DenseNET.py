@@ -10,7 +10,6 @@ from keras.optimizers import Adam
 from keras.applications.xception import Xception
 from keras.preprocessing.image import ImageDataGenerator
 
-
 def running_commands():
 	nvsmi = subprocess.run('/home/macierz/s175405/ResearchProject12KASK/nvsmiPowerLog.sh', shell=True , capture_output=False)
 	yokotool = subprocess.run('/home/macierz/s175405/ResearchProject12KASK/yokotoolPowerLog.sh', shell=True, capture_output=False)
@@ -32,23 +31,17 @@ train_dir = dir + "train/"
 test_dir = dir + "test/"
 val_dir = dir + "valid/"
 
-# total number of species
-species_count = len(data_['class index'].unique())
-
 train_gen = ImageDataGenerator(rescale=1./255)
 test_gen = ImageDataGenerator(rescale=1./255)
 val_gen = ImageDataGenerator(rescale=1./255)
 
 train_data = train_gen.flow_from_directory( train_dir , target_size=(224,224,3) , batch_size=GLOBAL_BATCH_SIZE , class_mode = "categorical" ,shuffle=True )
-
 val_data = val_gen.flow_from_directory( val_dir , target_size=(224,224,3) , batch_size=GLOBAL_BATCH_SIZE , class_mode = "categorical" , shuffle=True )
-
 test_data = test_gen.flow_from_directory( test_dir , target_size=(224,224,3) , batch_size=GLOBAL_BATCH_SIZE , class_mode = "categorical" ,shuffle=False )
 
 #=== DEFINING THE MODEL
 def get_model():
     xceptionnet = Xception( include_top=False , weights="imagenet" , input_shape=(224,224,3))
-
     xceptionnet.trainable = False
 
     model = Sequential([
