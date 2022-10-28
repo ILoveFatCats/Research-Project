@@ -20,11 +20,6 @@ strategy = tf.distribute.MirroredStrategy(GPUs)                     # Distributi
 BATCH_SIZE = 512                                                    # Default value is: 512 (it yields the best performance)
 GLOBAL_BATCH_SIZE = BATCH_SIZE * strategy.num_replicas_in_sync      # Auto-scalability of our training
 
-# Create some tensors
-a = tf.constant([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
-b = tf.constant([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
-c = tf.matmul(a, b)
-
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.listdir('/home/macierz/s175405/ResearchProject12KASK/birdsDataset')  #Ubuntu 20.04   cluster directory   Quadro RTX 5000 / Quadro RTX 6000
 data_ = pd.read_csv('/home/macierz/s175405/ResearchProject12KASK/birdsDataset/birds.csv')
@@ -44,7 +39,7 @@ train_ds = tf.keras.utils.image_dataset_from_directory(
     image_size=(224,224),
 )
 
-valid_ds = tf.keras.utils.image_dataset_from_directory(
+test_ds = tf.keras.utils.image_dataset_from_directory(
     directory=valid_dir,
     labels='inferred',
     label_mode='categorical',
@@ -55,7 +50,7 @@ valid_ds = tf.keras.utils.image_dataset_from_directory(
 class_names = train_ds.class_names
 normalization_layer = layers.Rescaling(1./255)
 train_ds = train_ds.map(lambda x, y: (normalization_layer(x), y))
-valid_ds = valid_ds.map(lambda x, y: (normalization_layer(x), y))
+test_ds = test_ds.map(lambda x, y: (normalization_layer(x), y))
 
 #=== DEFINING THE MODEL
 def get_model():
@@ -85,11 +80,13 @@ def get_model():
 # === FOR MULTI GPU TRAINING
 with strategy.scope():
     gpu_model = get_model()
-gpu_model.fit(train_ds, epochs = 5)
+gpu_model.fit(train_ds, epochs = 5, validation_split = 0.2)
+gpu_model.evaluate(test_ds)
 
 # === FOR SINGLE GPU TRAINING
 #gpu_model = get_model()
-#gpu_model.fit(train_ds, epochs = 5)
+#gpu_model.fit(train_ds, epochs = 5, validation_split = 0.2)
+#gpu_model.evaluate(test_ds)
 
 Omae_Wa_Mou_Shindeiru = subprocess.run('/home/macierz/s175405/ResearchProject12KASK/kill.sh', shell=True, capture_output=False)
 
