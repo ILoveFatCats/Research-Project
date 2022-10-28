@@ -7,6 +7,22 @@ from tensorflow import keras
 from keras import layers
 from keras.models import Sequential
 from keras.optimizers import Adam
+from sklearn.model_selection import train_test_split
+
+def get_dataset_partitions_tf(ds, ds_size, train_split=0.8, val_split=0.2, shuffle=True, shuffle_size=500):
+    assert (train_split + val_split) == 1
+    
+    if shuffle:
+        # Specify seed to always have the same split distribution between runs
+        ds = ds.shuffle(shuffle_size, seed=12)
+    
+    train_size = int(train_split * ds_size)
+    val_size = int(val_split * ds_size)
+    
+    train_ds = ds.take(train_size)    
+    val_ds = ds.skip(train_size).take(val_size)
+    
+    return train_ds, val_ds
 
 def running_commands():
 	nvsmi = subprocess.run('/home/macierz/s175405/ResearchProject12KASK/nvsmiPowerLog.sh', shell=True , capture_output=False)
@@ -47,6 +63,8 @@ test_ds = tf.keras.utils.image_dataset_from_directory(
     image_size=(224,224),
 )
 
+ds_train, ds_val = get_dataset_partitions_tf(train_ds, train_ds.size)
+
 class_names = train_ds.class_names
 normalization_layer = layers.Rescaling(1./255)
 train_ds = train_ds.map(lambda x, y: (normalization_layer(x), y))
@@ -80,12 +98,12 @@ def get_model():
 # === FOR MULTI GPU TRAINING
 with strategy.scope():
     gpu_model = get_model()
-gpu_model.fit(train_ds, epochs = 5, validation_split = 0.2)
+gpu_model.fit(ds_train, epochs = 5, validation_data = ds_val)
 gpu_model.evaluate(test_ds)
 
 # === FOR SINGLE GPU TRAINING
 #gpu_model = get_model()
-#gpu_model.fit(train_ds, epochs = 5, validation_split = 0.2)
+#gpu_model.fit(ds_train, epochs = 5, validation_data = ds_val)
 #gpu_model.evaluate(test_ds)
 
 Omae_Wa_Mou_Shindeiru = subprocess.run('/home/macierz/s175405/ResearchProject12KASK/kill.sh', shell=True, capture_output=False)
