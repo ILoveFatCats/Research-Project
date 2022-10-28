@@ -62,7 +62,7 @@ test_ds = tf.keras.utils.image_dataset_from_directory(
     image_size=(224,224),
 )
 
-ds_train, ds_val = get_dataset_partitions_tf(train_ds, len(train_ds_))
+ds_train, ds_val = get_dataset_partitions_tf(train_ds, len(train_ds))
 
 class_names = train_ds.class_names
 normalization_layer = layers.Rescaling(1./255)
