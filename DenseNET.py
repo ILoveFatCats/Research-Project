@@ -7,6 +7,7 @@ from tensorflow import keras
 from keras import layers
 from keras.models import Sequential
 from keras.optimizers import Adam
+from keras.applications.xception import Xception
 
 def get_dataset_partitions_tf(ds, ds_size, train_split=0.8, val_split=0.2, shuffle=True, shuffle_size=500):
     assert (train_split + val_split) == 1
@@ -40,57 +41,40 @@ os.listdir('/home/macierz/s175405/ResearchProject12KASK/birdsDataset')  #Ubuntu 
 data_ = pd.read_csv('/home/macierz/s175405/ResearchProject12KASK/birdsDataset/birds.csv')
 data_.head()
 dir = '/home/macierz/s175405/ResearchProject12KASK/birdsDataset/'
-train_dir = dir + 'train'
-valid_dir = dir + 'test'
+train_dir = dir + "train/"
+test_dir = dir + "test/"
+val_dir = dir + "valid/"
 
 # total number of species
 species_count = len(data_['class index'].unique())
 
-train_ds = tf.keras.utils.image_dataset_from_directory(
-    directory=train_dir,
-    labels='inferred',
-    label_mode='categorical',
-    batch_size=GLOBAL_BATCH_SIZE,
-    image_size=(224,224),
-)
+train_gen = ImageDataGenerator(rescale=1./255)
+test_gen = ImageDataGenerator(rescale=1./255)
+val_gen = ImageDataGenerator(rescale=1./255)
 
-test_ds = tf.keras.utils.image_dataset_from_directory(
-    directory=valid_dir,
-    labels='inferred',
-    label_mode='categorical',
-    batch_size=GLOBAL_BATCH_SIZE,
-    image_size=(224,224),
-)
+train_data = train_gen.flow_from_directory( train_dir , target_size=(224,224,3) , batch_size=GLOBAL_BATCH_SIZE , class_mode = "categorical" ,shuffle=True )
 
-ds_train, ds_val = get_dataset_partitions_tf(train_ds, len(train_ds))
+val_data = val_gen.flow_from_directory( val_dir , target_size=(224,224,3) , batch_size=GLOBAL_BATCH_SIZE , class_mode = "categorical" , shuffle=True )
 
-class_names = train_ds.class_names
-normalization_layer = layers.Rescaling(1./255)
-train_ds = train_ds.map(lambda x, y: (normalization_layer(x), y))
-test_ds = test_ds.map(lambda x, y: (normalization_layer(x), y))
+test_data = test_gen.flow_from_directory( test_dir , target_size=(224,224,3) , batch_size=GLOBAL_BATCH_SIZE , class_mode = "categorical" ,shuffle=False )
 
 #=== DEFINING THE MODEL
 def get_model():
-    densenet_raw_model = tf.keras.applications.densenet.DenseNet121(
-        include_top=False,
-        weights='imagenet',
-        input_shape=(224,224,3), # input size of image fixed
-        pooling='max',
-    )
-    densenet_raw_model.trainable = False
+    xceptionnet = Xception( include_top=False , weights="imagenet" , input_shape=(224,224,3))
 
-    model = keras.Sequential([  
-        densenet_raw_model,
-        layers.Flatten(),
-        layers.Dense(units=16384,activation='relu'),
-        layers.Dense(units=8192,activation='relu'),
-        layers.Dense(units=4096,activation='relu'),
-        layers.Dense(units=2048,activation='relu'),
-        layers.Dense(units=400, activation="softmax"),
+    xceptionnet.trainable = False
+
+    model = Sequential([
+        xceptionnet,
+        layers.GlobalAveragePooling2D(),
+        layers.BatchNormalization(),
+        layers.Dense(256,activation='relu'),
+        layers.BatchNormalization(),
+        layers.Dense(400,activation='softmax')
     ])
 
     model.compile(
-        optimizer=tf.keras.optimizers.Adam(learning_rate=0.01),
+        optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
         loss='categorical_crossentropy',
         metrics=['accuracy']
     )
@@ -99,13 +83,13 @@ def get_model():
 # === FOR MULTI GPU TRAINING
 with strategy.scope():
     gpu_model = get_model()
-gpu_model.fit(ds_train, epochs = 5, validation_data = ds_val)
-gpu_model.evaluate(test_ds)
+history = gpu_model.fit(train_data, epochs = 10, validation_data = val_data)
+results = gpu_model.evaluate(test_data)
 
 # === FOR SINGLE GPU TRAINING
 #gpu_model = get_model()
-#gpu_model.fit(ds_train, epochs = 5, validation_data = ds_val)
-#gpu_model.evaluate(test_ds)
+#history = gpu_model.fit(train_data, epochs = 10, validation_data = val_data)
+#results = gpu_model.evaluate(test_data)
 
 Omae_Wa_Mou_Shindeiru = subprocess.run('/home/macierz/s175405/ResearchProject12KASK/kill.sh', shell=True, capture_output=False)
 
