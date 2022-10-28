@@ -8,6 +8,7 @@ from keras import layers
 from keras.models import Sequential
 from keras.optimizers import Adam
 from keras.applications.xception import Xception
+from keras.preprocessing.image import ImageDataGenerator
 
 
 def running_commands():
