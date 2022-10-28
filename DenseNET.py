@@ -7,7 +7,6 @@ from tensorflow import keras
 from keras import layers
 from keras.models import Sequential
 from keras.optimizers import Adam
-from sklearn.model_selection import train_test_split
 
 def get_dataset_partitions_tf(ds, ds_size, train_split=0.8, val_split=0.2, shuffle=True, shuffle_size=500):
     assert (train_split + val_split) == 1
