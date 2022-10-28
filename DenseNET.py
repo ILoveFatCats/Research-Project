@@ -35,9 +35,9 @@ train_gen = ImageDataGenerator(rescale=1./255)
 test_gen = ImageDataGenerator(rescale=1./255)
 val_gen = ImageDataGenerator(rescale=1./255)
 
-train_data = train_gen.flow_from_directory( train_dir , target_size=(224,224,3) , batch_size=GLOBAL_BATCH_SIZE , class_mode = "categorical" ,shuffle=True )
-val_data = val_gen.flow_from_directory( val_dir , target_size=(224,224,3) , batch_size=GLOBAL_BATCH_SIZE , class_mode = "categorical" , shuffle=True )
-test_data = test_gen.flow_from_directory( test_dir , target_size=(224,224,3) , batch_size=GLOBAL_BATCH_SIZE , class_mode = "categorical" ,shuffle=False )
+train_data = train_gen.flow_from_directory( train_dir , target_size=(224,224) , batch_size=GLOBAL_BATCH_SIZE , class_mode = "categorical" ,shuffle=True )
+val_data = val_gen.flow_from_directory( val_dir , target_size=(224,224) , batch_size=GLOBAL_BATCH_SIZE , class_mode = "categorical" , shuffle=True )
+test_data = test_gen.flow_from_directory( test_dir , target_size=(224,224) , batch_size=GLOBAL_BATCH_SIZE , class_mode = "categorical" ,shuffle=False )
 
 #=== DEFINING THE MODEL
 def get_model():
