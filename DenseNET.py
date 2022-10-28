@@ -82,8 +82,10 @@ def get_model():
     model = keras.Sequential([  
         densenet_raw_model,
         layers.Flatten(),
-        layers.Dense(units=2000,activation='relu'),
-        layers.BatchNormalization(),
+        layers.Dense(units=16384,activation='relu'),
+        layers.Dense(units=8192,activation='relu'),
+        layers.Dense(units=4096,activation='relu'),
+        layers.Dense(units=2048,activation='relu'),
         layers.Dense(units=400, activation="softmax"),
     ])
 
